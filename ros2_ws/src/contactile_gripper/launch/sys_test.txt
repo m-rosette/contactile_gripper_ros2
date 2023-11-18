@@ -1,0 +1,5 @@
+<node pkg="contactile_gripper" name="sys_test" exec="sys_test_node.py" output="screen">
+    <ros-args>
+      -TBD
+    </ros-args>
+</node>
