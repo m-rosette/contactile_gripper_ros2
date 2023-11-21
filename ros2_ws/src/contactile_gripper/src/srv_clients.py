@@ -18,6 +18,7 @@ def gripper_change_mode_srv_client(mode, node):
     rclpy.spin_until_future_complete(node, future)
     response = future.result()
     # node.destroy_node()
+    node.get_logger().info(response.response)
     return response.response
 
 # def stepper_off_srv_client(mode):

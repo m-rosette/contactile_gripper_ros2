@@ -10,7 +10,7 @@ import support.gripper as gripper
 
 class GripperNode(Node):
     def __init__(self):
-        super().__init__('gripper_node', namespace='')
+        super().__init__('gripper_node')
 
         # Set the logging level for this node
         self.get_logger().set_level(rclpy.logging.LoggingSeverity.INFO)
@@ -90,7 +90,9 @@ class GripperNode(Node):
             if not com_err and pos != 0:
                 # self.gripper_pos_pub.publish(pos)
                 # self.gripper_pos = pos
-                self.gripper_pos_pub.publish(Int64(data=pos))
+                msg = Int64()
+                msg.data = pos
+                self.gripper_pos_pub.publish(msg)
                 self.gripper_pos = pos
 
     def send_command(self):

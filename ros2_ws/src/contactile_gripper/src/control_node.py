@@ -3,7 +3,6 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String, Float32, Int64, Int32, Bool
-# from papillarray_ros_v2.msg import SensorState
 from sensor_interfaces.msg import SensorState
 from contactile_gripper.msg import Float32List, Int32List
 from contactile_gripper.srv import *
@@ -15,6 +14,9 @@ class ControlNode(Node):
     def __init__(self):
         super().__init__('control_node')
 
+        # Set the logging level for this node
+        self.get_logger().set_level(rclpy.logging.LoggingSeverity.INFO)
+
         # Publishers
         self.gripper_cmd_pub = self.create_publisher(String, 'Gripper_Cmd', 1)
         self.routine_running_pub = self.create_publisher(Bool, 'Routine_Running', 100)
@@ -24,9 +26,9 @@ class ControlNode(Node):
         self.gripper_pos = None
         # self.imu_sub = self.create_subscription(Float32, 'IMU_Acc', self.gripper_pos_callback, 1)
         # self.imu_data = {"acc_x":None,"acc_y":None,"acc_z":None}
-        self.tact_sensor0_sub = self.create_subscription(SensorState, '/hub_0/sensor_0', self.tact_0_callback, 1)
+        self.tact_pillar_sub = self.create_subscription(SensorState, '/hub_0/sensor_0', self.tact_0_callback, 1)
         self.tact_sensor0 = None
-        self.tact_sensor1_sub = self.create_subscription(SensorState, '/hub_0/sensor_1', self.tact_1_callback, 1)
+        self.tact_pillar_sub = self.create_subscription(SensorState, '/hub_0/sensor_1', self.tact_1_callback, 1)
         self.tact_sensor1 = None
 
         # Services
@@ -56,7 +58,7 @@ class ControlNode(Node):
         self.gripper_goal_pos = self.gripper_pos
         self.gripper_goal_cur = 18
 
-        rclpy.on_shutdown(self.shutdown_function)
+        # rclpy.on_shutdown(self.shutdown_function)
 
         self.main_loop_rate = 30  # Hz
         self.main_loop_rate_obj = self.create_rate(self.main_loop_rate)
@@ -87,6 +89,7 @@ class ControlNode(Node):
 
     def gripper_pos_callback(self,msg):
         self.gripper_pos = msg.data
+        self.get_logger().info(f"Received gripper position: {self.gripper_pos}")
 
     def imu_callback(self,msg):
         pass
@@ -94,8 +97,9 @@ class ControlNode(Node):
     ######################## Main loop ########################
     def main_loop(self):
         """Publishes motor commands to the motor depending on the current operating mode parameters."""
-        while not rclpy.ok():
+        while rclpy.ok():
             self.control_function()
+            self.get_logger().info("Inside main loop")  # Add a debug statement
             self.main_loop_rate_obj.sleep()
 
     ######################## Control/Routine Functions ########################
